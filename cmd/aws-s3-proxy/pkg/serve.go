@@ -18,6 +18,9 @@ import (
 	"github.com/packethost/aws-s3-proxy/internal/config"
 	"github.com/packethost/aws-s3-proxy/internal/controllers"
 	common "github.com/packethost/aws-s3-proxy/internal/http"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	muxprom "gitlab.com/msvechla/mux-prometheus/pkg/middleware"
 )
 
 var serveCmd = &cobra.Command{
@@ -169,6 +172,13 @@ func serve() {
 
 	// A gorilla/mux router is used to allow for more control
 	router := mux.NewRouter()
+
+	// Add Metrics
+	instrumentation := muxprom.NewDefaultInstrumentation()
+	router.Use(instrumentation.Middleware)
+
+	router.Path("/metrics").Handler(promhttp.Handler())
+
 	router.PathPrefix("/").Handler(common.WrapHandler(controllers.AwsS3Get)).Methods("GET")
 
 	// Require Auth for upload

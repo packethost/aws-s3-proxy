@@ -8,10 +8,12 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/prometheus/client_golang v1.8.0
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
+	gitlab.com/msvechla/mux-prometheus v0.0.2
 	go.uber.org/atomic v1.5.1 // indirect
 	go.uber.org/automaxprocs v1.4.0
 	go.uber.org/multierr v1.4.0 // indirect
