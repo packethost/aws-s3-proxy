@@ -20,7 +20,6 @@ import (
 	common "github.com/packethost/aws-s3-proxy/internal/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	muxprom "gitlab.com/msvechla/mux-prometheus/pkg/middleware"
 )
 
 var serveCmd = &cobra.Command{
@@ -174,9 +173,6 @@ func serve() {
 	router := mux.NewRouter()
 
 	// Add Metrics
-	instrumentation := muxprom.NewDefaultInstrumentation()
-	router.Use(instrumentation.Middleware)
-
 	router.Path("/metrics").Handler(promhttp.Handler())
 
 	router.PathPrefix("/").Handler(common.WrapHandler(controllers.AwsS3Get)).Methods("GET")
