@@ -223,6 +223,10 @@ func makeRouter() (*echo.Echo, *string) {
 	p := prometheus.NewPrometheus("echo", nil)
 	p.Use(router)
 
+	// Healthchecks
+	router.GET("/_health", s3.Health())
+
+	// Everything else
 	router.GET("/*", s3.Handler(s3.AwsS3Get))
 	router.HEAD("/*", s3.Handler(s3.AwsS3Get))
 
