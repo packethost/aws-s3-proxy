@@ -24,7 +24,7 @@ type Upload struct {
 // Get returns a specified object from Amazon S3
 func get(ctx context.Context, bucket *config.Bucket, key, rangeHeader *string) (*Download, error) {
 	if bucket.Session == nil {
-		config.Logger.Panic("bad s3 client")
+		config.Cfg.Logger.Panic("bad s3 client")
 	}
 
 	req := &s3.GetObjectInput{

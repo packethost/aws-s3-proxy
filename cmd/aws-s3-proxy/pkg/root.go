@@ -88,10 +88,10 @@ func setupLogging() {
 		cfg = zap.NewDevelopmentConfig()
 	}
 
+	// Level is already at InfoLevel, so only change to DebugLevel
+	// when the flag is set
 	if viper.GetBool("logging.debug") {
-		cfg.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
-	} else {
-		cfg.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
+		cfg.Level.SetLevel(zap.DebugLevel)
 	}
 
 	l, err := cfg.Build()

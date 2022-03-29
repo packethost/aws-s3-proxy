@@ -103,7 +103,7 @@ func AwsS3Get(e echo.Context) error {
 	get, err := get(req.Context(), &c.PrimaryStore, path, rangeHeader)
 	if err != nil {
 		if c.ReadThrough.Enabled {
-			e.Logger().Warn("err in primary, trying secondary")
+			c.Logger.Warn("err in primary, trying secondary")
 			return trySecondary(e)
 		}
 
@@ -115,7 +115,7 @@ func AwsS3Get(e echo.Context) error {
 			status, _ = strconv.Atoi(statusStr[1])
 		}
 
-		e.Logger().Errorf("status %d", status)
+		c.Logger.Errorf("status %d", status)
 
 		return e.String(status, err.Error())
 	}
