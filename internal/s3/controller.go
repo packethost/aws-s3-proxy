@@ -3,6 +3,7 @@ package s3
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -13,7 +14,9 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/s3"
+	echoprom "github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/packethost/aws-s3-proxy/internal/config"
 )
@@ -56,6 +59,15 @@ func trySecondary(e echo.Context) error {
 	req := e.Request()
 	res := e.Response()
 	path := &req.URL.Path
+
+	// Increment the echo_secondary_store_read_through_total counter
+	ssReadThroughCounter, err := findMetric(c.Metrics.MetricsList,
+		"secondary_store_read_through_total")
+	if err != nil {
+		c.Logger.Errorw("metrics error", "error", err)
+	} else {
+		incrementMetric(ssReadThroughCounter)
+	}
 
 	// Range header
 	var rangeHeader *string
@@ -247,4 +259,21 @@ func getFileSizeAsString(obj *s3.GetObjectOutput) string {
 	}
 
 	return ""
+}
+
+func findMetric(metrics []*echoprom.Metric, metricName string) (*echoprom.Metric, error) {
+	for _, metric := range metrics {
+		if metric.Name == metricName {
+			return metric, nil
+		}
+	}
+
+	return nil, nil
+}
+
+func incrementMetric(metric *echoprom.Metric) {
+	var counter *prometheus.Counter
+	counter = metric
+	counter.Inc()
+	fmt.Printf("%+v\n", metric.MetricCollector)
 }

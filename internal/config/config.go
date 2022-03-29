@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	echoprom "github.com/labstack/echo-contrib/prometheus"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -67,15 +68,17 @@ type Config struct {
 	SecondaryStore Bucket
 	PrimaryStore   Bucket
 	ReadThrough    ReadThrough
+	Metrics        *echoprom.Prometheus
 }
 
 // Load configurations and map to the config struct
-func Load(ctx context.Context, l *zap.SugaredLogger) {
+func Load(ctx context.Context, l *zap.SugaredLogger, metrics *echoprom.Prometheus) {
 	if err := viper.Unmarshal(&Cfg); err != nil {
 		log.Fatalf("Unable to decode into struct, %v", err)
 	}
 
 	Cfg.Logger = l
+	Cfg.Metrics = metrics
 
 	Cfg.PrimaryStore.BuildS3API()
 	Cfg.SecondaryStore.BuildS3API()

@@ -10,15 +10,16 @@ import (
 	"syscall"
 	"time"
 
-	echoprom "github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/cobra"
 
+	echoprom "github.com/labstack/echo-contrib/prometheus"
 	"go.uber.org/automaxprocs/maxprocs"
 
 	"github.com/packethost/aws-s3-proxy/internal/config"
-	echozaplogger "github.com/packethost/aws-s3-proxy/internal/middleware/echo-zap-logger"
+	zapmw "github.com/packethost/aws-s3-proxy/internal/middleware/echo-zap-logger"
+	prommw "github.com/packethost/aws-s3-proxy/internal/middleware/prometheus"
 	"github.com/packethost/aws-s3-proxy/internal/s3"
 )
 
@@ -26,6 +27,7 @@ var (
 	maxIdleConns     = 150
 	idleTimeout      = 10
 	exitDelayTimeout = 600
+	metrics          *echoprom.Prometheus
 )
 
 var serveCmd = &cobra.Command{
@@ -202,38 +204,35 @@ func init() {
 
 	// S3 store configs
 	s3Flags()
+
+	// Setup the prometheus metrics
+	setupMetrics()
+}
+
+func setupMetrics() {
+	metrics = prommw.Prometheus()
 }
 
 func makeRouter() (*echo.Echo, *string) {
 	c := config.Cfg
 	s := c.ServerOpts
-	// A labstack/echo router
 
+	// A labstack/echo router
 	router := echo.New()
 
+	// Logging and other misc. middleware
 	router.Use(
-		echozaplogger.ZapLogger(logger.Desugar()),
+		zapmw.ZapLogger(logger.Desugar()),
 		middleware.RequestID(),
 		middleware.Recover(),
 		middleware.Decompress(),
 		middleware.Gzip(),
 	)
 
-	// Metrics
-	secondaryStoreCounter := echoprom.Metric{
-		Type:        "counter",
-		Name:        "secondary_store_read_through_total",
-		ID:          "secStoreReadThruReq",
-		Description: "The total requests that read through to the secondary store.",
-	}
-	customMetricList := []*echoprom.Metric{&secondaryStoreCounter}
-	p := echoprom.NewPrometheus("echo", nil, customMetricList)
-	p.Use(router)
+	// Metrics middleware
+	metrics.Use(router)
 
-	// Healthchecks
 	router.GET("/_health", s3.Health())
-
-	// Everything else
 	router.GET("/*", s3.Handler(s3.AwsS3Get))
 	router.HEAD("/*", s3.Handler(s3.AwsS3Get))
 
@@ -252,7 +251,7 @@ func serve(ctx context.Context) {
 	}
 
 	// This maps the viper values to the Config object
-	config.Load(ctx, logger)
+	config.Load(ctx, logger, metrics)
 
 	router, addr := makeRouter()
 
