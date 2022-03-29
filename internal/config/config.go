@@ -17,9 +17,6 @@ import (
 // Cfg represents its configurations
 var Cfg *Config
 
-// Logger exports a logger to be used by all parts of the application
-var Logger *zap.SugaredLogger
-
 // ReadThrough holds info if we are transparently reading back to upstream
 type ReadThrough struct {
 	Enabled        bool
@@ -78,7 +75,6 @@ func Load(ctx context.Context, l *zap.SugaredLogger) {
 		log.Fatalf("Unable to decode into struct, %v", err)
 	}
 
-	Logger = l
 	Cfg.Logger = l
 
 	Cfg.PrimaryStore.BuildS3API()
