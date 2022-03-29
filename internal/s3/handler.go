@@ -8,7 +8,7 @@ import (
 	"github.com/packethost/aws-s3-proxy/internal/config"
 )
 
-// Handler wraps every the controllers
+// Handler wraps every controller
 func Handler(handler echo.HandlerFunc) echo.HandlerFunc {
 	return echo.HandlerFunc(func(e echo.Context) error {
 		h := config.Cfg.HTTPOpts
