@@ -66,7 +66,7 @@ type ServerOpts struct {
 type Config struct {
 	HTTPOpts       HTTPOpts
 	ServerOpts     ServerOpts
-	Logger         zap.SugaredLogger
+	Logger         *zap.SugaredLogger
 	SecondaryStore Bucket
 	PrimaryStore   Bucket
 	ReadThrough    ReadThrough
@@ -79,6 +79,7 @@ func Load(ctx context.Context, l *zap.SugaredLogger) {
 	}
 
 	Logger = l
+	Cfg.Logger = l
 
 	Cfg.PrimaryStore.BuildS3API()
 	Cfg.SecondaryStore.BuildS3API()
