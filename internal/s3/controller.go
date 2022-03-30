@@ -16,6 +16,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/packethost/aws-s3-proxy/internal/config"
+	metrics "github.com/packethost/aws-s3-proxy/internal/metrics"
 )
 
 var getStatus *regexp.Regexp
@@ -56,6 +57,9 @@ func trySecondary(e echo.Context) error {
 	req := e.Request()
 	res := e.Response()
 	path := &req.URL.Path
+
+	// Increment the echo_secondary_store_read_through_total counter
+	metrics.SecondaryStoreCounter.Inc()
 
 	// Range header
 	var rangeHeader *string

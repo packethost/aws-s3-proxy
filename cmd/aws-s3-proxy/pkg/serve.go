@@ -10,15 +10,18 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
 
+	echoprom "github.com/labstack/echo-contrib/prometheus"
 	"go.uber.org/automaxprocs/maxprocs"
 
 	"github.com/packethost/aws-s3-proxy/internal/config"
-	echozaplogger "github.com/packethost/aws-s3-proxy/internal/middleware/echo-zap-logger"
+	metrics "github.com/packethost/aws-s3-proxy/internal/metrics"
+	zapmw "github.com/packethost/aws-s3-proxy/internal/middleware/echo-zap-logger"
+	promMW "github.com/packethost/aws-s3-proxy/internal/middleware/prometheus"
 	"github.com/packethost/aws-s3-proxy/internal/s3"
 )
 
@@ -26,6 +29,7 @@ var (
 	maxIdleConns     = 150
 	idleTimeout      = 10
 	exitDelayTimeout = 600
+	metricsMW        *echoprom.Prometheus
 )
 
 var serveCmd = &cobra.Command{
@@ -202,31 +206,39 @@ func init() {
 
 	// S3 store configs
 	s3Flags()
+
+	// Setup the prometheus metrics
+	setupMetrics()
+}
+
+func setupMetrics() {
+	metricsMW = promMW.Prometheus()
+
+	if err := prometheus.Register(metrics.SecondaryStoreCounter); err != nil {
+		logger.Fatal(err)
+	}
 }
 
 func makeRouter() (*echo.Echo, *string) {
 	c := config.Cfg
 	s := c.ServerOpts
-	// A labstack/echo router
 
+	// A labstack/echo router
 	router := echo.New()
 
+	// Logging and other misc. middleware
 	router.Use(
-		echozaplogger.ZapLogger(logger.Desugar()),
+		zapmw.ZapLogger(logger.Desugar()),
 		middleware.RequestID(),
 		middleware.Recover(),
 		middleware.Decompress(),
 		middleware.Gzip(),
 	)
 
-	// Metrics
-	p := prometheus.NewPrometheus("echo", nil)
-	p.Use(router)
+	// Metrics middleware
+	metricsMW.Use(router)
 
-	// Healthchecks
 	router.GET("/_health", s3.Health())
-
-	// Everything else
 	router.GET("/*", s3.Handler(s3.AwsS3Get))
 	router.HEAD("/*", s3.Handler(s3.AwsS3Get))
 
