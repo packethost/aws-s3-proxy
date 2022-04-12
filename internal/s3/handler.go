@@ -22,6 +22,12 @@ func Handler(handler echo.HandlerFunc) echo.HandlerFunc {
 			return nil
 		}
 
+		// With the fall back we don't want to list the dir.
+		if req.URL.Path == "/" {
+			res.WriteHeader(http.StatusNotFound)
+			return nil
+		}
+
 		// Facility Header if set
 		if h.Facility != "" {
 			res.Header().Add("Facility", h.Facility)
