@@ -66,11 +66,9 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err != nil {
-		logger.Infof("unable to read in config file: %v", err)
+	if err := viper.ReadInConfig(); err == nil {
+		logger.Infof("using config file: %s", viper.ConfigFileUsed())
 	}
-
-	logger.Infof("using config file: %s", viper.ConfigFileUsed())
 }
 
 // viperBindFlag provides a wrapper around the viper pflag bindings that handles error checks
