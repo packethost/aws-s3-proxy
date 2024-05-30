@@ -18,6 +18,7 @@ func Health() echo.HandlerFunc {
 		if h.Facility != "" {
 			res.Header().Add("Facility", h.Facility)
 		}
+
 		res.WriteHeader(http.StatusOK)
 
 		return nil

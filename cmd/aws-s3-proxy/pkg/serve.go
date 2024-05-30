@@ -131,7 +131,6 @@ func s3Flags() {
 	}
 
 	for _, store := range stores {
-
 		envVarAccessKey := strings.ToUpper(strings.ReplaceAll(store, "-", "_")) + "_ACCESS_KEY"
 		envVarSecretKey := strings.ToUpper(strings.ReplaceAll(store, "-", "_")) + "_SECRET_KEY"
 
