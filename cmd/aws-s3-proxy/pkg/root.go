@@ -74,11 +74,17 @@ func initConfig() {
 	setupLogging()
 }
 
-// viperBindFlag provides a wrapper around the viper bindings that handles error checks
+// viperBindFlag provides a wrapper around the viper pflag bindings that handles error checks
 func viperBindFlag(name string, flag *pflag.Flag) {
-	err := viper.BindPFlag(name, flag)
-	if err != nil {
-		panic(err)
+	if err := viper.BindPFlag(name, flag); err != nil {
+		logger.Fatalf("Failed to bind flag: %v", err)
+	}
+}
+
+// viperBindEnv provides a wrapper around the viper env var bindings that handles error checks
+func viperBindEnv(input ...string) {
+	if err := viper.BindEnv(input...); err != nil {
+		logger.Fatalf("Failed to bind environment variable: %v", err)
 	}
 }
 

@@ -109,14 +109,6 @@ func s3Flags() {
 		required     bool
 	}{
 		{
-			long:     "access-key",
-			describe: "s3 access-key",
-		},
-		{
-			long:     "secret-key",
-			describe: "s3 secret-access-key",
-		},
-		{
 			long:     "bucket",
 			describe: "bucket name",
 		},
@@ -131,6 +123,13 @@ func s3Flags() {
 	}
 
 	for _, store := range stores {
+
+		envVarAccessKey := strings.ToUpper(strings.ReplaceAll(store, "-", "_")) + "_ACCESS_KEY"
+		envVarSecretKey := strings.ToUpper(strings.ReplaceAll(store, "-", "_")) + "_SECRET_KEY"
+
+		viperBindEnv(camelCase(store)+".AccessKey", envVarAccessKey)
+		viperBindEnv(camelCase(store)+".SecretKey", envVarSecretKey)
+
 		for _, boolFlag := range boolFlags {
 			// concatenated flag name
 			f := fmt.Sprintf("%s-%s", store, boolFlag.long)
@@ -209,6 +208,10 @@ func init() {
 
 	// Setup the prometheus metrics
 	setupMetrics()
+}
+
+func camelCase(input string) string {
+	return strings.ReplaceAll(strings.ToTitle(strings.ReplaceAll(input, "-", " ")), " ", "")
 }
 
 func setupMetrics() {
