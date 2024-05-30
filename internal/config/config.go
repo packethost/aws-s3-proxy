@@ -26,7 +26,7 @@ type ReadThrough struct {
 
 // String implements the Stringer interface for the Bucket struct
 func (b Bucket) String() string {
-	return fmt.Sprintf("Name: %s, AccessKey: %s, SecretKey: %s, Endpoint: %s, IdleConnTimeout: %v, Region: %s, S3Prefix: %s, InsecureTLS: %v, DisableCompression: %v, DisableBucketSSL: %v, MaxIdleConns: %d}",
+	return fmt.Sprintf("Name: %s, AccessKey: %s, SecretKey: %s, Endpoint: %s, IdleConnTimeout: %v, Region: %s, S3Prefix: %s, InsecureTLS: %v, DisableCompression: %v, DisableBucketSSL: %v, MaxIdleConns: %d",
 		b.Bucket, b.AccessKey, "********", b.Endpoint, b.IdleConnTimeout, b.Region, b.S3Prefix, b.InsecureTLS, b.DisableCompression, b.DisableBucketSSL, b.MaxIdleConns)
 }
 
