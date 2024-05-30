@@ -2,9 +2,7 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -38,12 +36,14 @@ func init() {
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatalf(err.Error())
+		log.Fatal(err)
 	}
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	setupLogging()
+
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -51,8 +51,7 @@ func initConfig() {
 		// Find home directory.
 		home, err := homedir.Dir()
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			logger.Fatalf("unable to find home directory: %v", err)
 		}
 
 		// Search config in home directory with name ".s3-proxy" (without extension).
@@ -67,24 +66,24 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	if err := viper.ReadInConfig(); err != nil {
+		logger.Infof("unable to read in config file: %v", err)
 	}
 
-	setupLogging()
+	logger.Infof("using config file: %s", viper.ConfigFileUsed())
 }
 
 // viperBindFlag provides a wrapper around the viper pflag bindings that handles error checks
 func viperBindFlag(name string, flag *pflag.Flag) {
 	if err := viper.BindPFlag(name, flag); err != nil {
-		logger.Fatalf("Failed to bind flag: %v", err)
+		logger.Fatalf("failed to bind flag: %v", err)
 	}
 }
 
 // viperBindEnv provides a wrapper around the viper env var bindings that handles error checks
 func viperBindEnv(input ...string) {
 	if err := viper.BindEnv(input...); err != nil {
-		logger.Fatalf("Failed to bind environment variable: %v", err)
+		logger.Fatalf("failed to bind environment variable: %v", err)
 	}
 }
 

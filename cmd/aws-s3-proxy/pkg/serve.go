@@ -44,10 +44,10 @@ func httpFlags() {
 	serveCmd.Flags().String("facility", "", "Location where the service is running")
 	viperBindFlag("httpopts.facility", serveCmd.Flags().Lookup("facility"))
 
-	serveCmd.Flags().String("http-cache-control", "", "overrides S3's HTTP `Cache-Control` header")
+	serveCmd.Flags().String("http-cache-control", "", "override S3 HTTP `Cache-Control` header")
 	viperBindFlag("httpopts.httpcachecontrol", serveCmd.Flags().Lookup("http-cache-control"))
 
-	serveCmd.Flags().String("http-expires", "", "overrides S3's HTTP `Expires` header")
+	serveCmd.Flags().String("http-expires", "", "override S3 HTTP `Expires` header")
 	viperBindFlag("httpopts.httpexpires", serveCmd.Flags().Lookup("http-expires"))
 
 	serveCmd.Flags().String("healthcheck-path", "", "path for healthcheck")
@@ -109,6 +109,14 @@ func s3Flags() {
 		required     bool
 	}{
 		{
+			long:     "access-key",
+			describe: "s3 access-key",
+		},
+		{
+			long:     "secret-key",
+			describe: "s3 secret-access-key",
+		},
+		{
 			long:     "bucket",
 			describe: "bucket name",
 		},
@@ -127,8 +135,8 @@ func s3Flags() {
 		envVarAccessKey := strings.ToUpper(strings.ReplaceAll(store, "-", "_")) + "_ACCESS_KEY"
 		envVarSecretKey := strings.ToUpper(strings.ReplaceAll(store, "-", "_")) + "_SECRET_KEY"
 
-		viperBindEnv(camelCase(store)+".AccessKey", envVarAccessKey)
-		viperBindEnv(camelCase(store)+".SecretKey", envVarSecretKey)
+		viperBindEnv(titleCase(store)+".AccessKey", envVarAccessKey)
+		viperBindEnv(titleCase(store)+".SecretKey", envVarSecretKey)
 
 		for _, boolFlag := range boolFlags {
 			// concatenated flag name
@@ -210,7 +218,7 @@ func init() {
 	setupMetrics()
 }
 
-func camelCase(input string) string {
+func titleCase(input string) string {
 	return strings.ReplaceAll(strings.ToTitle(strings.ReplaceAll(input, "-", " ")), " ", "")
 }
 
@@ -278,13 +286,15 @@ func serve(ctx context.Context) {
 			shutdown <- os.Interrupt
 		}
 
-		logger.Infof("[config] Primary bucket '%s'", config.Cfg.PrimaryStore.Bucket)
+		logger.Infof("[config] primary bucket: Name: %s", config.Cfg.PrimaryStore.Bucket)
+		logger.Debugf("[config] primary bucket details: %s", config.Cfg.PrimaryStore)
 
 		if config.Cfg.ReadThrough.Enabled {
-			logger.Infof("[config] Secondary bucket '%s'", config.Cfg.SecondaryStore.Bucket)
+			logger.Infof("[config] secondary bucket: Name: %s", config.Cfg.SecondaryStore.Bucket)
+			logger.Debugf("[config] primary bucket details: %s", config.Cfg.SecondaryStore)
 
 			if config.Cfg.SecondaryStore.Session == nil {
-				logger.Error("invalid secoindary bucket session")
+				logger.Error("invalid secondary bucket session")
 
 				shutdown <- os.Interrupt
 			}
@@ -304,6 +314,6 @@ func serve(ctx context.Context) {
 	}()
 
 	if err := router.Shutdown(ctx); err != nil {
-		logger.Errorf("Failed graceful shutdown", err)
+		logger.Errorf("failed graceful shutdown", err)
 	}
 }

@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -21,6 +22,12 @@ var Cfg *Config
 type ReadThrough struct {
 	Enabled        bool
 	CacheToPrimary bool
+}
+
+// String implements the Stringer interface for the Bucket struct
+func (b Bucket) String() string {
+	return fmt.Sprintf("Name: %s, AccessKey: %s, SecretKey: %s, Endpoint: %s, IdleConnTimeout: %v, Region: %s, S3Prefix: %s, InsecureTLS: %v, DisableCompression: %v, DisableBucketSSL: %v, MaxIdleConns: %d}",
+		b.Bucket, b.AccessKey, "********", b.Endpoint, b.IdleConnTimeout, b.Region, b.S3Prefix, b.InsecureTLS, b.DisableCompression, b.DisableBucketSSL, b.MaxIdleConns)
 }
 
 // Bucket has the attributes needed to interact with S3 buckets

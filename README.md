@@ -43,6 +43,7 @@ Flags:
       --http-expires Expires                          overrides S3's HTTP Expires header
       --listen-address string                         host address to listen on (default "::1")
       --listen-port string                            port to listen on (default "21080")
+      --primary-store-access-key string               s3 access-key
       --primary-store-bucket string                   bucket name
       --primary-store-disable-bucket-ssl              toggle tls for the aws-sdk
       --primary-store-disable-compression             toggle compressions
@@ -51,7 +52,9 @@ Flags:
       --primary-store-insecure-tls                    toogle tls verify
       --primary-store-max-idle-connections int        max idle connections (default 150)
       --primary-store-region string                   region for bucket
+      --primary-store-secret-key string               s3 secret-access-key
       --secondary-fall-back                           toggle read from secondary
+      --secondary-store-access-key string             s3 access-key
       --secondary-store-bucket string                 bucket name
       --secondary-store-disable-bucket-ssl            toggle tls for the aws-sdk
       --secondary-store-disable-compression           toggle compressions
@@ -60,6 +63,7 @@ Flags:
       --secondary-store-insecure-tls                  toogle tls verify
       --secondary-store-max-idle-connections int      max idle connections (default 150)
       --secondary-store-region string                 region for bucket
+      --secondary-store-secret-key string             s3 secret-access-key
 
 Global Flags:
       --config string   config file (default is $HOME/.s3-proxy.yaml)
