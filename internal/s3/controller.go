@@ -97,6 +97,7 @@ func AwsS3Get(e echo.Context) error {
 	req := e.Request()
 	res := e.Response()
 	path := &req.URL.Path
+	store := &c.PrimaryStore
 
 	// Range header
 	var rangeHeader *string
@@ -104,10 +105,12 @@ func AwsS3Get(e echo.Context) error {
 		rangeHeader = &candidate
 	}
 
-	get, err := get(req.Context(), &c.PrimaryStore, path, rangeHeader)
+	get, err := get(req.Context(), store, path, rangeHeader)
 	if err != nil {
 		if c.ReadThrough.Enabled {
-			c.Logger.Warn("err in primary, trying secondary")
+			c.Logger.Errorf("unable to get %s from %s: %v", *path, store.Bucket, err)
+			c.Logger.Info("err in primary, trying secondary")
+
 			return trySecondary(e)
 		}
 
