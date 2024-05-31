@@ -19,11 +19,10 @@ If auth is enable, you can upload to the bucket (assuming your AWS credentials p
 
 Environment Variables     | Description                                       | Required | Default
 ------------------------- | ------------------------------------------------- | -------- | -----------------
-AWS_REGION                | The AWS `region` where the S3 bucket exists.      |          | us-east-1
-AWS_ACCESS_KEY_ID         | AWS `access key` for API access.                  |          | EC2 Instance Role
-AWS_SECRET_ACCESS_KEY     | AWS `secret key` for API access.                  |          | EC2 Instance Role
-AWS_API_ENDPOINT          | The endpoint for AWS API for local development.   |          | -
-S3_PROXY_BASIC_AUTH_PASS  | Password for basic authentication.                |          | -
+PRIMARY_STORE_ACCESS_KEY         | Primary AWS `access key` for API access.                  |          | EC2 Instance Role
+PRIMARY_STORE_SECRET_KEY     | Primary AWS `secret key` for API access.                  |          | EC2 Instance Role
+SECONDARY_STORE_ACCESS_KEY         | Secondary AWS `access key` for API access.                  |          | EC2 Instance Role
+SECONDARY_STORE_SECRET_KEY     | Secondary AWS `secret key` for API access.                  |          | EC2 Instance Role
 
 Other environment variables can be set by `S3_PROXY_` and uppercase CLI options without hyphens or underscores, so `--listen-port` becomes `S3_PROXY_LISTENPORT`.
 
@@ -37,37 +36,34 @@ Usage:
   aws-s3-proxy serve [flags]
 
 Flags:
-      --access-log                         toggle access log
-      --aws-api-endpoint string            AWS API Endpoint
-      --aws-region string                  AWS region for s3, default AWS env vars will override (default "us-east-1")
-      --basic-auth-user string             username for basic auth
-      --content-encoding                   toggle content encoding (default true)
-      --cors-allow-headers string          CORS: Comma-delimited list of the supported request headers
-      --cors-allow-methods string          CORS: comma-delimited list of the allowed - https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html
-      --cors-allow-origin string           CORS: a URI that may access the resource
-      --cors-max-age int                   CORS: max age in seconds (default 600)
-      --directory-listing                  toggle directory listing
-      --directory-listing-format           toggle directory listing spider formatted
-      --disable-compression                toggle compression (default true)
-      --disable-upstream-ssl               toggle tls for the aws-sdk
-      --enable-upload                      toggle upload, requires auth
-      --get-all-pages-in-dir               toggle getting all pages in directories
-      --guess-bucket-timeout int           timeout, in seconds, for guessing bucket region (default 10)
-      --healthcheck-path string            path for healthcheck
-  -h, --help                               help for serve
-      --http-cache-control Cache-Control   overrides S3's HTTP Cache-Control header
-      --http-expires Expires               overrides S3's HTTP Expires header
-      --idle-connection-timeout int        idle connection timeout in seconds (default 10)
-      --index-document string              the index document for static website (default "index.html")
-      --insecure-tls                       toggle insecure tls
-      --listen-address string              host address to listen on (default "::1")
-      --listen-port string                 port to listen on (default "21080")
-      --max-idle-connections int           max idle connections (default 150)
-      --ssl-cert-path string               path to ssl cert
-      --ssl-key-path string                path to ssl key
-      --strip-path string                  strip path prefix
-      --upstream-bucket string             upstream s3 bucket
-      --upstream-key-prefix string         upstream s3 path/key prefix
+      --facility string                               Location where the service is running
+      --healthcheck-path string                       path for healthcheck
+  -h, --help                                          help for serve
+      --http-cache-control Cache-Control              overrides S3's HTTP Cache-Control header
+      --http-expires Expires                          overrides S3's HTTP Expires header
+      --listen-address string                         host address to listen on (default "::1")
+      --listen-port string                            port to listen on (default "21080")
+      --primary-store-access-key string               s3 access-key
+      --primary-store-bucket string                   bucket name
+      --primary-store-disable-bucket-ssl              toggle tls for the aws-sdk
+      --primary-store-disable-compression             toggle compressions
+      --primary-store-endpoint string                 endpoint URL (hostname only or fully qualified URI)
+      --primary-store-idle-connection-timeout int     idle connection timeout in seconds (default 10)
+      --primary-store-insecure-tls                    toogle tls verify
+      --primary-store-max-idle-connections int        max idle connections (default 150)
+      --primary-store-region string                   region for bucket
+      --primary-store-secret-key string               s3 secret-access-key
+      --secondary-fall-back                           toggle read from secondary
+      --secondary-store-access-key string             s3 access-key
+      --secondary-store-bucket string                 bucket name
+      --secondary-store-disable-bucket-ssl            toggle tls for the aws-sdk
+      --secondary-store-disable-compression           toggle compressions
+      --secondary-store-endpoint string               endpoint URL (hostname only or fully qualified URI)
+      --secondary-store-idle-connection-timeout int   idle connection timeout in seconds (default 10)
+      --secondary-store-insecure-tls                  toogle tls verify
+      --secondary-store-max-idle-connections int      max idle connections (default 150)
+      --secondary-store-region string                 region for bucket
+      --secondary-store-secret-key string             s3 secret-access-key
 
 Global Flags:
       --config string   config file (default is $HOME/.s3-proxy.yaml)

@@ -1,4 +1,6 @@
 linters-settings:
+  errcheck:
+    ignore: ''
   goimports:
     local-prefixes: github.com/packethost/aws-s3-proxy
   gofumpt:
@@ -7,36 +9,29 @@ linters-settings:
 linters:
   enable:
     # default linters
-    - deadcode
     - errcheck
     - gosimple
     - govet
     - ineffassign
-    - staticcheck
-    - structcheck
     - typecheck
     - unused
-    - varcheck
 
     # additional linters
     - bodyclose
     - gocritic
     - gocyclo
-    - goerr113
+    - err113
     - gofmt
-    # - gofumpt
+    - gofumpt
     - goimports
-    - golint
-    - gomnd
+    - mnd
     - govet
-    - maligned
     - misspell
     - noctx
     - stylecheck
     - whitespace
     - wsl
 
-    # - bod
 issues:
   exclude:
     # Default excludes from `golangci-lint run --help` with EXC0002 removed

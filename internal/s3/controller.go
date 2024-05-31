@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"reflect"
 	"regexp"
@@ -97,6 +96,7 @@ func AwsS3Get(e echo.Context) error {
 	req := e.Request()
 	res := e.Response()
 	path := &req.URL.Path
+	store := &c.PrimaryStore
 
 	// Range header
 	var rangeHeader *string
@@ -104,10 +104,12 @@ func AwsS3Get(e echo.Context) error {
 		rangeHeader = &candidate
 	}
 
-	get, err := get(req.Context(), &c.PrimaryStore, path, rangeHeader)
+	get, err := get(req.Context(), store, path, rangeHeader)
 	if err != nil {
 		if c.ReadThrough.Enabled {
-			c.Logger.Warn("err in primary, trying secondary")
+			c.Logger.Errorf("unable to get %s from %s: %v", *path, store.Bucket, err)
+			c.Logger.Info("err in primary, trying secondary")
+
 			return trySecondary(e)
 		}
 
@@ -136,7 +138,7 @@ func AwsS3Put(e echo.Context) error {
 	res := e.Response()
 	path := &req.URL.Path
 
-	b, err := ioutil.ReadAll(req.Body)
+	b, err := io.ReadAll(req.Body)
 	if err != nil {
 		e.Error(err)
 		return err
@@ -241,9 +243,7 @@ func totalFileSizeEqualToContentRange(obj *s3.GetObjectOutput) bool {
 	return totalSizeIsEqualToContentRange
 }
 
-/**
-See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Range
-*/
+// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Range
 func getFileSizeAsString(obj *s3.GetObjectOutput) string {
 	s := strings.Split(*obj.ContentRange, "/")
 	if len(s) > 1 {
