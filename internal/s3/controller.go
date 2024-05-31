@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"reflect"
 	"regexp"
@@ -139,7 +138,7 @@ func AwsS3Put(e echo.Context) error {
 	res := e.Response()
 	path := &req.URL.Path
 
-	b, err := ioutil.ReadAll(req.Body)
+	b, err := io.ReadAll(req.Body)
 	if err != nil {
 		e.Error(err)
 		return err
